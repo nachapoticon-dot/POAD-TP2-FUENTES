@@ -19,3 +19,6 @@ separando lo que se puede reutilizar de lo que se descarta?
 - Materiales: cuánto de cada material lleva un quintal de producto,
   en qué presentación se compra y si el sobrante es reutilizable.
 - Fuente de los datos: a definir.
+
+## Lenguaje
+Todo el trabajo se hace únicamente en Python.
