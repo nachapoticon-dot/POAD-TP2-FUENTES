@@ -10,7 +10,8 @@ sys.path.insert(0, str(RAIZ / "src"))
 from fuentes import ErrorDatos, FuenteDatos, FuenteCSV, FuenteJSON, crear_fuente
 from modelo import Pedido
 from pipeline import (fecha_valida, validar_pedido, limpiar_pedidos, preparar_materiales,
-                      preparar_recetas, preparar_ofertas, preparar_cantidades)
+                      preparar_recetas, preparar_ofertas, preparar_cantidades,
+                      calcular_necesidades, calcular_faltantes)
 
 DATOS = RAIZ / "data"
 
@@ -130,6 +131,21 @@ class PruebasReferencias(unittest.TestCase):
                   "kg_por_presentacion": "25", "precio_cop": "310000"}]
         with self.assertRaisesRegex(ErrorDatos, "AZU"):
             preparar_ofertas(filas, MATERIALES)
+
+
+class PruebasCompras(unittest.TestCase):
+    def test_necesidades_de_pedidos_conocidos(self):
+        pedidos = [Pedido("PED-001", "2026-10-02", "A", "Pólvora negra grano fino", 2),
+                   Pedido("PED-002", "2026-10-03", "B", "Pólvora para mecha", 1)]
+        necesidades = calcular_necesidades(pedidos, RECETAS)
+        self.assertAlmostEqual(necesidades["NIT"], 112)  # 2 * 37.5 + 37
+        self.assertAlmostEqual(necesidades["DEX"], 0.5)
+        self.assertAlmostEqual(sum(necesidades.values()), 3 * 50)  # 3 quintales = 150 kg
+        self.assertEqual(calcular_necesidades([], RECETAS), {})
+
+    def test_faltantes_descuentan_inventario(self):
+        faltantes = calcular_faltantes({"NIT": 100, "AZU": 10}, {"NIT": 30, "AZU": 50})
+        self.assertEqual(faltantes, {"NIT": 70, "AZU": 0})
 
 
 if __name__ == "__main__":

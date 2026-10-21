@@ -198,3 +198,20 @@ def limpiar_pedidos(registros, recetas):
     if not pedidos:
         raise ErrorDatos("No quedan pedidos válidos para planificar")
     return pedidos, rechazos
+
+
+# --- Cálculo de compras, sobrantes e inventario ---
+
+def calcular_necesidades(pedidos, recetas):
+    necesidades = {}
+    for pedido in pedidos:
+        for material, kg in pedido.necesidades(recetas[pedido.producto]).items():
+            necesidades[material] = necesidades.get(material, 0) + kg
+    return necesidades
+
+
+def calcular_faltantes(necesidades, inventario):
+    return {
+        material: max(kg - inventario.get(material, 0), 0)
+        for material, kg in necesidades.items()
+    }

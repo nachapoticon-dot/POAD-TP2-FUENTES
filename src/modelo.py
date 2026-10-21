@@ -12,6 +12,10 @@ class Pedido:
     def kg_totales(self):
         return self.quintales * KG_POR_QUINTAL
 
+    def necesidades(self, receta):
+        """Kg de cada material que lleva el pedido según la receta de su producto."""
+        return {material: kg * self.quintales for material, kg in receta.items()}
+
     def __str__(self):
         return f"{self.codigo} | {self.fecha} | {self.cliente} | {self.producto} | {self.quintales:g} qq"
 
