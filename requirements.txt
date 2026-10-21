@@ -1,0 +1,2 @@
+# No usa bibliotecas externas: solo la biblioteca estándar de Python 3.10 o superior
+# (csv, json, re, datetime, math, abc, pathlib, unittest)
