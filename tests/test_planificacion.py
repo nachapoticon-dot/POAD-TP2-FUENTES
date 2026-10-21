@@ -1,4 +1,5 @@
 import json
+import math
 import sys
 import tempfile
 import unittest
@@ -12,7 +13,8 @@ from modelo import Pedido, Oferta
 from pipeline import (fecha_valida, validar_pedido, limpiar_pedidos, preparar_materiales,
                       preparar_recetas, preparar_ofertas, preparar_cantidades,
                       calcular_necesidades, calcular_faltantes, elegir_compra,
-                      verificar_cupos, actualizar_inventario)
+                      verificar_cupos, actualizar_inventario, guardar_csv)
+from main import planificar
 
 DATOS = RAIZ / "data"
 
@@ -179,6 +181,44 @@ class PruebasCompras(unittest.TestCase):
         nuevo = actualizar_inventario(inventario, {"NIT": 30}, [{"material": "NIT", "kg": 25}], [])
         self.assertEqual(inventario, {"NIT": 12})
         self.assertEqual(nuevo, {"NIT": 7})
+
+
+class PruebasResultado(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.resultado = planificar(DATOS / "pedidos.csv")
+
+    def test_mismo_resultado_con_csv_y_json(self):
+        desde_json = planificar(DATOS / "pedidos.json")
+        for clave in ("compras", "sobrantes", "rechazos", "inventario_nuevo"):
+            self.assertEqual(self.resultado[clave], desde_json[clave])
+
+    def test_conservacion_de_cantidades(self):
+        """inventario inicial + comprado - consumido - descartado = inventario final."""
+        inventario = {fila["material"]: float(fila["kg_disponible"])
+                      for fila in FuenteCSV().cargar(DATOS / "inventario.csv")}
+        recetas = preparar_recetas(FuenteCSV().cargar(DATOS / "recetas.csv"), self.resultado["materiales"])
+        necesidades = calcular_necesidades(self.resultado["pedidos"], recetas)
+        for material, final in self.resultado["inventario_nuevo"].items():
+            comprado = sum(c["kg"] for c in self.resultado["compras"] if c["material"] == material)
+            descartado = sum(s["kg_sobrante"] for s in self.resultado["sobrantes"]
+                             if s["material"] == material and s["destino"] == "descartar")
+            esperado = inventario[material] + comprado - necesidades[material] - descartado
+            self.assertTrue(math.isclose(final, esperado, abs_tol=0.01), material)
+
+    def test_inventario_final_sin_negativos_ni_descartables(self):
+        materiales = self.resultado["materiales"]
+        for material, kg in self.resultado["inventario_nuevo"].items():
+            self.assertGreaterEqual(kg, 0)
+            if not materiales[material]["reutilizable"]:
+                self.assertEqual(kg, 0)
+
+    def test_guardar_csv_se_puede_volver_a_leer(self):
+        ruta = Path(tempfile.mkdtemp()) / "compras.csv"
+        guardar_csv(self.resultado["compras"], ruta)
+        releido = FuenteCSV().cargar(ruta)
+        self.assertEqual(len(releido), len(self.resultado["compras"]))
+        self.assertEqual(releido[0]["proveedor"], self.resultado["compras"][0]["proveedor"])
 
 
 if __name__ == "__main__":

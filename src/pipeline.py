@@ -1,3 +1,4 @@
+import csv
 import math
 import re
 from datetime import datetime
@@ -305,3 +306,10 @@ def verificar_resultado(faltantes, compras, inventario_nuevo):
     for material, kg in inventario_nuevo.items():
         if kg < 0:
             raise ErrorDatos(f"El inventario de {material} quedaría negativo")
+
+
+def guardar_csv(filas, ruta):
+    with open(ruta, "w", encoding="utf-8", newline="") as archivo:
+        escritor = csv.DictWriter(archivo, fieldnames=list(filas[0].keys()))
+        escritor.writeheader()
+        escritor.writerows(filas)
