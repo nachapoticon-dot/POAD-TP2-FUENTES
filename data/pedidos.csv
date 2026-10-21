@@ -1,0 +1,57 @@
+id,fecha,cliente,producto,quintales
+PED-001,2026-10-02,Cliente F,Pólvora negra grano grueso,4
+PED-002,2026-10-04,Cliente C,Pólvora para mecha,6
+PED-003,2026-10-05,Cliente H,Pólvora negra grano fino,2
+PED-004,2026-10-07,Cliente E,Pólvora negra grano grueso,3
+PED-005,2026-10-08,Cliente B,Pólvora para mecha,5
+PED-006,2026-10-10,Cliente G,Pólvora negra grano fino,1
+PED-007,2026-10-11,Cliente D,Pólvora negra grano grueso,2.5
+PED-008,2026-10-13,Cliente A,Pólvora para mecha,8
+PED-009,2026-10-14,Cliente F,Pólvora negra grano fino,3
+PED-010,2026-10-16,Cliente C,Pólvora negra grano grueso,4
+PED-011,2026-10-17,Cliente H,Pólvora para mecha,1.5
+PED-012,2026-10-19,Cliente E,Pólvora negra grano fino,6
+PED-012,2026-10-19,Cliente B,Pólvora para mecha,3
+PED-013,2026-10-20,Cliente B,Pólvora negra grano grueso,2
+PED-014,2026-10-22,Cliente G,Pólvora para mecha,7
+PED-015,2026-10-23,Cliente D,Pólvora negra grano fino,3
+PED-016,2026-10-25,Cliente A,Pólvora negra grano grueso,5
+PED-017,2026-10-26,Cliente F,Pólvora para mecha,2
+PED17,2026-10-27,Cliente C,Pólvora negra grano fino,2
+PED-018,2026-10-28,Cliente C,Pólvora negra grano fino,4
+PED-019,2026-10-29,Cliente H,Pólvora negra grano grueso,1
+PED-020,2026-10-31,Cliente E,Pólvora para mecha,6
+PED-021,2026-11-01,Cliente B,Pólvora negra grano fino,3.5
+PED-022,2026-11-03,Cliente G,Pólvora negra grano grueso,2
+PED-023,2026-11-04,Cliente D,Pólvora para mecha,5
+PED-051,2026-11-31,Cliente D,Pólvora negra grano grueso,4
+PED-024,2026-11-06,Cliente A,Pólvora negra grano fino,4
+PED-025,2026-11-07,Cliente F,Pólvora negra grano grueso,3
+PED-026,2026-11-09,Cliente C,Pólvora para mecha,8
+PED-027,2026-11-10,Cliente H,Pólvora negra grano fino,1
+PED-028,2026-11-12,Cliente E,Pólvora negra grano grueso,2
+PED-029,2026-11-13,Cliente B,Pólvora para mecha,6
+PED-030,2026-11-15,Cliente G,Pólvora negra grano fino,4.5
+PED-052,2026-11-20,Cliente E,Pólvora de colores,2
+PED-031,2026-11-16,Cliente D,Pólvora negra grano grueso,3
+PED-032,2026-11-18,Cliente A,Pólvora para mecha,2
+PED-033,2026-11-19,Cliente F,Pólvora negra grano fino,5
+PED-034,2026-11-21,Cliente C,Pólvora negra grano grueso,1
+PED-035,2026-11-22,Cliente H,Pólvora para mecha,7
+PED-036,2026-11-24,Cliente E,Pólvora negra grano fino,4
+PED-037,2026-11-25,Cliente B,Pólvora negra grano grueso,2
+PED-053,2026-12-02,Cliente F,Pólvora para mecha,0
+PED-038,2026-11-27,Cliente G,Pólvora para mecha,3
+PED-039,2026-11-28,Cliente D,Pólvora negra grano fino,6
+PED-040,2026-11-30,Cliente A,Pólvora negra grano grueso,2.5
+PED-041,2026-12-01,Cliente F,Pólvora para mecha,4
+PED-042,2026-12-03,Cliente C,Pólvora negra grano fino,1
+PED-054,2026-12-09,,Pólvora negra grano fino,
+PED-043,2026-12-04,Cliente H,Pólvora negra grano grueso,5
+PED-044,2026-12-06,Cliente E,Pólvora para mecha,3
+PED-045,2026-12-07,Cliente B,Pólvora negra grano fino,2
+PED-046,2026-12-09,Cliente G,Pólvora negra grano grueso,6
+PED-047,2026-12-10,Cliente D,Pólvora para mecha,4
+PED-048,2026-12-12,Cliente A,Pólvora negra grano fino,1.5
+PED-049,2026-12-13,Cliente F,Pólvora negra grano grueso,3
+PED-050,2026-12-15,Cliente C,Pólvora para mecha,5
