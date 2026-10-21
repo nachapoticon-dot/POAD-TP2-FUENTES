@@ -8,10 +8,10 @@ RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 
 from fuentes import ErrorDatos, FuenteDatos, FuenteCSV, FuenteJSON, crear_fuente
-from modelo import Pedido
+from modelo import Pedido, Oferta
 from pipeline import (fecha_valida, validar_pedido, limpiar_pedidos, preparar_materiales,
                       preparar_recetas, preparar_ofertas, preparar_cantidades,
-                      calcular_necesidades, calcular_faltantes)
+                      calcular_necesidades, calcular_faltantes, elegir_compra)
 
 DATOS = RAIZ / "data"
 
@@ -23,6 +23,8 @@ RECETAS = {"Pólvora negra grano fino": {"NIT": 37.5, "CAR": 7.5, "AZU": 5.0},
            "Pólvora para mecha": {"NIT": 37.0, "CAR": 7.5, "AZU": 5.0, "DEX": 0.5}}
 PEDIDO_OK = {"id": "PED-001", "fecha": "2026-10-02", "cliente": "Cliente A",
              "producto": "Pólvora negra grano fino", "quintales": "4"}
+AZUFRE_25 = Oferta("P1", "Cali", "AZU", "bulto", 25, 95000)
+AZUFRE_50 = Oferta("P2", "Cúcuta", "AZU", "bulto", 50, 180000)
 
 
 class PruebasFuentes(unittest.TestCase):
@@ -146,6 +148,25 @@ class PruebasCompras(unittest.TestCase):
     def test_faltantes_descuentan_inventario(self):
         faltantes = calcular_faltantes({"NIT": 100, "AZU": 10}, {"NIT": 30, "AZU": 50})
         self.assertEqual(faltantes, {"NIT": 70, "AZU": 0})
+
+    def test_combinar_presentaciones(self):
+        compra = elegir_compra([AZUFRE_25, AZUFRE_50], 75)
+        self.assertEqual(sum(item["costo"] for item in compra), 275000)  # un bulto de 50 y uno de 25
+        self.assertEqual(sum(item["kg"] for item in compra), 75)
+
+    def test_si_no_falta_nada_no_se_compra(self):
+        self.assertEqual(elegir_compra([AZUFRE_25, AZUFRE_50], 0), [])
+
+    def test_empate_de_costo_deja_menos_sobrante(self):
+        ofertas = [Oferta("P1", "Cali", "X", "bolsa", 12, 100), Oferta("P2", "Cali", "X", "bolsa", 10, 100)]
+        compra = elegir_compra(ofertas, 9)
+        self.assertEqual(len(compra), 1)
+        self.assertEqual(compra[0]["proveedor"], "P2")
+
+    def test_cantidad_exacta_sin_sobrante(self):
+        self.assertEqual(AZUFRE_25.cantidad_para(50), 2)
+        self.assertEqual(AZUFRE_25.cantidad_para(50.0000001), 2)
+        self.assertEqual(AZUFRE_25.cantidad_para(51), 3)
 
 
 if __name__ == "__main__":

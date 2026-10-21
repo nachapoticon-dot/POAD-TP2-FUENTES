@@ -215,3 +215,61 @@ def calcular_faltantes(necesidades, inventario):
         material: max(kg - inventario.get(material, 0), 0)
         for material, kg in necesidades.items()
     }
+
+
+def elegir_compra(ofertas, kg_faltantes):
+    """Arma las opciones de compra (cada presentación sola, o una combinada con otra
+    que completa lo que falta) y se queda con la más barata; si empatan, con la que
+    deja menos sobrante."""
+    if kg_faltantes <= 0:
+        return []
+
+    opciones = []
+    for principal in ofertas:
+        maximo = principal.cantidad_para(kg_faltantes)
+        opciones.append([(principal, maximo)])
+        for otra in ofertas:
+            if otra is principal:
+                continue
+            for cantidad in range(maximo):
+                resto = kg_faltantes - cantidad * principal.kg
+                opciones.append([(principal, cantidad), (otra, otra.cantidad_para(resto))])
+
+    mejor = None
+    for opcion in opciones:
+        kg = sum(oferta.kg * cantidad for oferta, cantidad in opcion)
+        costo = sum(oferta.precio * cantidad for oferta, cantidad in opcion)
+        if mejor is None or (costo, kg) < (mejor["costo"], mejor["kg"]):
+            mejor = {"costo": costo, "kg": kg, "opcion": opcion}
+
+    return [
+        {
+            "proveedor": oferta.proveedor,
+            "material": oferta.material,
+            "presentacion": oferta.presentacion,
+            "cantidad": cantidad,
+            "kg": cantidad * oferta.kg,
+            "costo": cantidad * oferta.precio,
+        }
+        for oferta, cantidad in mejor["opcion"]
+        if cantidad > 0
+    ]
+
+
+def calcular_compras_y_sobrantes(faltantes, ofertas, materiales):
+    compras = []
+    sobrantes = []
+    for material, kg_faltantes in faltantes.items():
+        del_material = [oferta for oferta in ofertas if oferta.material == material]
+        compra = elegir_compra(del_material, kg_faltantes)
+        compras.extend(compra)
+
+        sobrante = sum(item["kg"] for item in compra) - kg_faltantes
+        if sobrante > 0:
+            reutilizable = materiales[material]["reutilizable"]
+            sobrantes.append({
+                "material": material,
+                "kg_sobrante": round(sobrante, 2),
+                "destino": "reutilizar" if reutilizable else "descartar",
+            })
+    return compras, sobrantes
