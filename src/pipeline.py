@@ -1,12 +1,18 @@
 import math
+import re
+from datetime import datetime
 
 from fuentes import ErrorDatos
-from modelo import KG_POR_QUINTAL, Oferta
+from modelo import KG_POR_QUINTAL, Oferta, Pedido
+
+PATRON_PEDIDO = re.compile(r"PED-\d{3}")
+PATRON_FECHA = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 COLUMNAS = {
     "materiales": ("id", "nombre", "controlado", "reutilizable"),
     "recetas": ("producto", "material", "kg_por_quintal"),
     "proveedores": ("proveedor", "ciudad", "material", "presentacion", "kg_por_presentacion", "precio_cop"),
+    "pedidos": ("id", "fecha", "cliente", "producto", "quintales"),
     "inventario": ("material", "kg_disponible"),
     "permisos": ("material", "cupo_anual_kg"),
 }
@@ -46,6 +52,17 @@ def a_booleano(valor, descripcion):
     if texto not in ("si", "no"):
         raise ErrorDatos(f"{descripcion} debe ser 'si' o 'no', no '{valor}'")
     return texto == "si"
+
+
+def fecha_valida(valor):
+    """La regex comprueba la forma AAAA-MM-DD; strptime, que la fecha exista en el calendario."""
+    if not isinstance(valor, str) or PATRON_FECHA.fullmatch(valor) is None:
+        return False
+    try:
+        datetime.strptime(valor, "%Y-%m-%d")
+    except ValueError:
+        return False
+    return True
 
 
 # --- Tablas de referencia: si tienen errores el programa se detiene ---
@@ -125,3 +142,59 @@ def preparar_cantidades(registros, tabla, columna, materiales):
             raise ErrorDatos(f"La tabla {tabla} tiene un valor negativo para {material}")
         cantidades[material] = kg
     return cantidades
+
+
+# --- Pedidos: las filas con errores se apartan con su motivo ---
+
+def validar_pedido(registro, recetas):
+    motivos = []
+
+    codigo = registro.get("id")
+    if not isinstance(codigo, str) or PATRON_PEDIDO.fullmatch(codigo) is None:
+        motivos.append("id con formato inválido")
+
+    if not fecha_valida(registro.get("fecha")):
+        motivos.append("fecha inválida")
+
+    cliente = registro.get("cliente")
+    if not isinstance(cliente, str) or cliente.strip() == "":
+        motivos.append("cliente faltante")
+
+    if registro.get("producto") not in recetas:
+        motivos.append("producto sin receta")
+
+    try:
+        quintales = convertir_numero(registro.get("quintales"))
+    except (ValueError, TypeError):
+        motivos.append("quintales no numérico")
+    else:
+        if quintales is None:
+            motivos.append("quintales faltante")
+        elif quintales <= 0:
+            motivos.append("quintales fuera de rango")
+
+    return motivos
+
+
+def limpiar_pedidos(registros, recetas):
+    validar_esquema(registros, "pedidos")
+    pedidos = []
+    rechazos = []
+    ids_aceptados = set()
+
+    for fila, registro in enumerate(registros, start=1):
+        motivos = validar_pedido(registro, recetas)
+        if registro.get("id") in ids_aceptados:
+            motivos.append("id duplicado")
+
+        if motivos:
+            rechazos.append({"fila": fila, "id": registro.get("id"), "motivo": "; ".join(motivos)})
+            continue
+
+        ids_aceptados.add(registro["id"])
+        pedidos.append(Pedido(registro["id"], registro["fecha"], registro["cliente"].strip(),
+                              registro["producto"], convertir_numero(registro["quintales"])))
+
+    if not pedidos:
+        raise ErrorDatos("No quedan pedidos válidos para planificar")
+    return pedidos, rechazos
