@@ -273,3 +273,35 @@ def calcular_compras_y_sobrantes(faltantes, ofertas, materiales):
                 "destino": "reutilizar" if reutilizable else "descartar",
             })
     return compras, sobrantes
+
+
+def verificar_cupos(compras, cupos):
+    avisos = []
+    for material, cupo in cupos.items():
+        kg_comprados = sum(item["kg"] for item in compras if item["material"] == material)
+        if kg_comprados > cupo:
+            avisos.append(f"La compra de {material} ({kg_comprados:g} kg) supera el cupo anual de {cupo:g} kg")
+    return avisos
+
+
+def actualizar_inventario(inventario, necesidades, compras, sobrantes):
+    nuevo = dict(inventario)
+    for item in compras:
+        nuevo[item["material"]] = nuevo.get(item["material"], 0) + item["kg"]
+    for material, kg in necesidades.items():
+        nuevo[material] = nuevo.get(material, 0) - kg
+    for sobrante in sobrantes:
+        if sobrante["destino"] == "descartar":
+            nuevo[sobrante["material"]] -= sobrante["kg_sobrante"]
+    return {material: round(kg, 2) for material, kg in nuevo.items()}
+
+
+def verificar_resultado(faltantes, compras, inventario_nuevo):
+    """Controles que se hacen en cada ejecución, no solo en las pruebas."""
+    for material, kg in faltantes.items():
+        comprado = sum(item["kg"] for item in compras if item["material"] == material)
+        if comprado < kg:
+            raise ErrorDatos(f"La compra de {material} no cubre lo que falta")
+    for material, kg in inventario_nuevo.items():
+        if kg < 0:
+            raise ErrorDatos(f"El inventario de {material} quedaría negativo")

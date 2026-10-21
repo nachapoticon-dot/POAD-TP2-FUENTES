@@ -11,7 +11,8 @@ from fuentes import ErrorDatos, FuenteDatos, FuenteCSV, FuenteJSON, crear_fuente
 from modelo import Pedido, Oferta
 from pipeline import (fecha_valida, validar_pedido, limpiar_pedidos, preparar_materiales,
                       preparar_recetas, preparar_ofertas, preparar_cantidades,
-                      calcular_necesidades, calcular_faltantes, elegir_compra)
+                      calcular_necesidades, calcular_faltantes, elegir_compra,
+                      verificar_cupos, actualizar_inventario)
 
 DATOS = RAIZ / "data"
 
@@ -167,6 +168,17 @@ class PruebasCompras(unittest.TestCase):
         self.assertEqual(AZUFRE_25.cantidad_para(50), 2)
         self.assertEqual(AZUFRE_25.cantidad_para(50.0000001), 2)
         self.assertEqual(AZUFRE_25.cantidad_para(51), 3)
+
+    def test_aviso_de_cupo(self):
+        compras = [{"material": "NIT", "kg": 750}, {"material": "NIT", "kg": 25}]
+        self.assertEqual(verificar_cupos(compras, {"NIT": 1000}), [])
+        self.assertEqual(len(verificar_cupos(compras, {"NIT": 700})), 1)
+
+    def test_actualizar_no_modifica_el_original(self):
+        inventario = {"NIT": 12}
+        nuevo = actualizar_inventario(inventario, {"NIT": 30}, [{"material": "NIT", "kg": 25}], [])
+        self.assertEqual(inventario, {"NIT": 12})
+        self.assertEqual(nuevo, {"NIT": 7})
 
 
 if __name__ == "__main__":
