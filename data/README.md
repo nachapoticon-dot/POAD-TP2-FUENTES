@@ -12,7 +12,7 @@
 ## Archivos
 | Archivo | Cada fila es | Variables |
 |---|---|---|
-| `pedidos.csv` | un pedido de un cliente | `id` (PED-000), `fecha` (AAAA-MM-DD), `cliente`, `producto`, `quintales` |
+| `pedidos.csv` / `pedidos.json` | un pedido de un cliente | `id` (PED-000), `fecha` (AAAA-MM-DD), `cliente`, `producto`, `quintales` |
 | `materiales.csv` | un material | `id`, `nombre`, `controlado` (si/no), `reutilizable` (si/no) |
 | `recetas.csv` | un material dentro de la receta de un producto | `producto`, `material`, `kg_por_quintal` |
 | `proveedores.csv` | una presentación que vende un proveedor | `proveedor`, `ciudad`, `material`, `presentacion`, `kg_por_presentacion`, `precio_cop` (pesos colombianos) |
@@ -21,7 +21,8 @@
 
 Todas las cantidades están en kg, salvo los pedidos, que están en quintales (1 quintal = 50 kg).
 
-`pedidos.csv` tiene 56 pedidos, de octubre a diciembre de 2026. Un valor faltante es una celda vacía.
+`pedidos.csv` y `pedidos.json` tienen los mismos 56 pedidos, de octubre a diciembre de 2026.
+En el JSON los quintales son números y un valor faltante es `null`; en el CSV es una celda vacía.
 Seis filas tienen errores a propósito para probar la limpieza: un id duplicado, un id mal
 escrito, una fecha que no existe, un producto sin receta, una cantidad en cero y una fila
 sin cliente ni cantidad.
