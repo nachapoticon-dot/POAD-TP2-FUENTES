@@ -24,7 +24,7 @@ COLUMNAS = {
 def validar_esquema(registros, tabla):
     if not registros:
         raise ErrorDatos(f"La tabla {tabla} está vacía")
-    faltan = set(COLUMNAS[tabla]) - set(registros[0])
+    faltan = set(COLUMNAS[tabla]) - set().union(*registros)
     if faltan:
         raise ErrorDatos(f"A la tabla {tabla} le faltan columnas: {', '.join(sorted(faltan))}")
 
@@ -32,6 +32,8 @@ def validar_esquema(registros, tabla):
 def convertir_numero(valor):
     if valor is None or (isinstance(valor, str) and valor.strip() == ""):
         return None
+    if isinstance(valor, bool):
+        raise ValueError("Un booleano no es una cantidad")
     numero = float(valor)
     if not math.isfinite(numero):
         raise ValueError(f"{valor} no es un número finito")
@@ -161,7 +163,7 @@ def validar_pedido(registro, recetas):
     if not isinstance(cliente, str) or cliente.strip() == "":
         motivos.append("cliente faltante")
 
-    if registro.get("producto") not in recetas:
+    if not isinstance(registro.get("producto"), str) or registro["producto"] not in recetas:
         motivos.append("producto sin receta")
 
     try:
@@ -185,7 +187,7 @@ def limpiar_pedidos(registros, recetas):
 
     for fila, registro in enumerate(registros, start=1):
         motivos = validar_pedido(registro, recetas)
-        if registro.get("id") in ids_aceptados:
+        if isinstance(registro.get("id"), str) and registro["id"] in ids_aceptados:
             motivos.append("id duplicado")
 
         if motivos:

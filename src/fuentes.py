@@ -13,21 +13,15 @@ class FuenteDatos(ABC):
     def cargar(self, ruta):
         """Devuelve los registros del archivo como una lista de diccionarios."""
 
-    def comprobar_archivo(self, ruta):
-        if not Path(ruta).is_file():
-            raise FileNotFoundError(f"No existe el archivo: {Path(ruta).name}")
-
 
 class FuenteCSV(FuenteDatos):
     def cargar(self, ruta):
-        self.comprobar_archivo(ruta)
         with open(ruta, encoding="utf-8", newline="") as archivo:
             return list(csv.DictReader(archivo))
 
 
 class FuenteJSON(FuenteDatos):
     def cargar(self, ruta):
-        self.comprobar_archivo(ruta)
         with open(ruta, encoding="utf-8") as archivo:
             try:
                 datos = json.load(archivo)

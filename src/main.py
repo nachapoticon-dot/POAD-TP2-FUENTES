@@ -73,12 +73,12 @@ def mostrar_resultados(resultado):
 
 def guardar_resultados(resultado, carpeta):
     carpeta.mkdir(exist_ok=True)
-    if resultado["compras"]:
-        guardar_csv(resultado["compras"], carpeta / "compras.csv")
-    if resultado["sobrantes"]:
-        guardar_csv(resultado["sobrantes"], carpeta / "sobrantes.csv")
-    if resultado["rechazos"]:
-        guardar_csv(resultado["rechazos"], carpeta / "rechazos.csv")
+    for nombre in ("compras", "sobrantes", "rechazos"):
+        ruta = carpeta / f"{nombre}.csv"
+        if resultado[nombre]:
+            guardar_csv(resultado[nombre], ruta)
+        else:
+            ruta.unlink(missing_ok=True)
     guardar_csv([{"material": m, "kg_disponible": kg} for m, kg in resultado["inventario_nuevo"].items()],
                 carpeta / "inventario_actualizado.csv")
 
@@ -86,10 +86,10 @@ def guardar_resultados(resultado, carpeta):
 def main(ruta_pedidos):
     try:
         resultado = planificar(ruta_pedidos)
-    except (ErrorDatos, FileNotFoundError) as error:
+        mostrar_resultados(resultado)
+        guardar_resultados(resultado, CARPETA_SALIDA)
+    except (ErrorDatos, OSError, UnicodeError) as error:
         sys.exit(f"Error: {error}")
-    mostrar_resultados(resultado)
-    guardar_resultados(resultado, CARPETA_SALIDA)
 
 
 if __name__ == "__main__":

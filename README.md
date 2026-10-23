@@ -53,8 +53,8 @@ python src/main.py                     # usa data/pedidos.csv
 python src/main.py data/pedidos.json   # mismos pedidos en JSON
 ```
 Los resultados se muestran por pantalla y se guardan en `outputs/`: `compras.csv`,
-`sobrantes.csv`, `inventario_actualizado.csv` y `rechazos.csv`. Los archivos de `data/`
-no se modifican.
+`sobrantes.csv`, `inventario_actualizado.csv` y `rechazos.csv`. Si una lista de compras,
+sobrantes o rechazos queda vacía, su CSV anterior se elimina. Los archivos de `data/` no se modifican.
 
 ## Pruebas
 ```bash
@@ -99,7 +99,7 @@ no depende del formato del archivo de pedidos.
   - la fecha no tiene la forma `AAAA-MM-DD` (expresión regular `\d{4}-\d{2}-\d{2}`) o no existe
     en el calendario (por ejemplo `2026-11-31`), lo que se comprueba con `datetime.strptime`;
   - falta el cliente, el producto no tiene receta, o los quintales faltan (vacío en CSV,
-    `null` en JSON), no son un número o no son positivos;
+    `null` en JSON), son booleanos, no son un número o no son positivos;
   - el id ya fue aceptado antes: se conserva la primera aparición.
 - Si no queda ningún pedido válido, el programa se detiene.
 
